@@ -1,0 +1,26 @@
+FROM selenium/standalone-chrome-debug
+
+MAINTAINER zeufackjojo@yahoo.fr
+USER 0
+RUN apt-get update && apt-get -y install vim nano pip
+
+RUN mkdir ~/automation
+
+RUN apt-get update && apt-get install -y python3
+RUN apt-get update && apt-get upgrade -y google-chrome-stable
+# Install ChromeDriver.
+RUN wget -N https://chromedriver.storage.googleapis.com/94.0.4606.61/chromedriver_linux64.zip -P ~/
+RUN unzip ~/chromedriver_linux64.zip -d ~/
+RUN rm ~/chromedriver_linux64.zip
+RUN mv -f ~/chromedriver /usr/local/bin/chromedriver
+RUN chmod +x /usr/local/bin/chromedriver
+
+COPY BDDCommon /automation/BDDCommon
+COPY tests /automation/tests
+COPY setup.py /automation
+COPY requirements.txt /automation
+
+WORKDIR /automation
+RUN pip install -r requirements.txt
+RUN python3 setup.py install
+CMD source env_docker.sh

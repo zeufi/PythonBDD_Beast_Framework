@@ -1,0 +1,33 @@
+FROM python:latest
+
+MAINTAINER zeufackjojo@yahoo.fr
+
+RUN apt-get update && apt-get -y install vim nano
+
+RUN mkdir /automation
+
+# Install x11vnc.
+RUN apt-get install -y x11vnc
+# Install fluxbox.
+RUN apt-get install -y fluxbox
+# Install wget.
+RUN apt-get install -y wget
+# Install wmctrl.
+RUN apt-get install -y wmctrl
+
+RUN apt-get update                             \
+ && apt-get install -y --no-install-recommends \
+    ca-certificates curl firefox-esr           \
+ && rm -fr /var/lib/apt/lists/*                \
+ && curl -L https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux64.tar.gz | tar xz -C /usr/local/bin \
+ && apt-get purge -y ca-certificates curl
+
+COPY BDDCommon /automation/BDDCommon
+COPY tests /automation/tests
+COPY setup.py /automation
+COPY requirements.txt /automation
+
+WORKDIR /automation
+RUN pip install -r requirements.txt
+RUN python3 setup.py install
+CMD source env_docker.sh
